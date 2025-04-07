@@ -1,0 +1,28 @@
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Dataset and output directories
+data/
+outputs/
+wandb/
+logs/
+samples/
+
+# Model files and checkpoints
+*.pt
+*.pth
+*.ckpt
+model_index.json
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VS Code settings
+.vscode/
+
+# Other typical files to ignore
+*.log
+*.bak
