@@ -4,12 +4,18 @@ __pycache__/
 *.pyo
 *.pyd
 
+# Environment
+clean_env/
+.env
+*.env
+
 # Dataset and output directories
 data/
 outputs/
 wandb/
 logs/
 samples/
+src/__pycache__
 
 # Model files and checkpoints
 *.pt
@@ -19,10 +25,15 @@ model_index.json
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
+*.nbconvert.ipynb
+
 
 # VS Code settings
 .vscode/
 
+# System files
+.DS_Store
+Thumbs.db
 # Other typical files to ignore
 *.log
 *.bak
