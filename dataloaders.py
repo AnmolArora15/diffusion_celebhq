@@ -4,7 +4,7 @@ from torchvision import transforms
 from config import TrainingConfig
 
 def get_dataloaders(config):
-    config = TrainingConfig()
+    # config = TrainingConfig()
 
     transform = transforms.Compose([
         transforms.Resize((config.image_size,config.image_size)),
