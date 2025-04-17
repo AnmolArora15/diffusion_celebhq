@@ -14,6 +14,20 @@ def get_lr_scheduler(optimizer, train_loader):
     
     return lr_scheduler
 
+#Linear Scheduler
+
+from transformers import get_linear_schedule_with_warmup
+
+def get_linear_scheduler(optimizer,train_loader):
+    config = TrainingConfig()
+
+    scheduler = get_linear_schedule_with_warmup(
+        optimizer=optimizer,
+        num_warmup_steps=int(0.1*len(train_loader) * config.num_epochs),
+        num_training_steps=(len(train_loader) * config.num_epochs)
+    )
+    return scheduler
+
 # Noise Scheduler
 
 def get_ddpm_scheduler():

@@ -13,7 +13,7 @@ from dataloaders import get_dataloaders
 from src.utils.optimizers import get_optimizer
 from torch.utils.data import DataLoader
 from torchvision import transforms
-from src.utils.scheduler import get_lr_scheduler, get_ddpm_scheduler
+from src.utils.scheduler import get_lr_scheduler, get_ddpm_scheduler, get_linear_scheduler
 from evaluate import evaluate
 from src.utils.fid import compute_fid
 from src.utils.make_grid import make_grid
@@ -21,7 +21,8 @@ from src.utils.make_grid import make_grid
 config = TrainingConfig()
 optimizer = get_optimizer(model)
 train_loader, test_loader = get_dataloaders(config=config)
-lr_scheduler = get_lr_scheduler(optimizer,train_loader)
+#lr_scheduler = get_lr_scheduler(optimizer,train_loader) # Cosine Scheduler
+lr_scheduler = get_linear_scheduler(optimizer,train_loader) # Linear Scheduler
 noise_scheduler = get_ddpm_scheduler()
 
 # Accelerator
@@ -64,9 +65,11 @@ for epoch in range(config.num_epochs):
 
             optimizer.step()
             lr_scheduler.step()
+            #linear_scheduler.step()
             optimizer.zero_grad()
 
         progress_bar.update(1)
+        torch.cuda.empty_cache()
         wandb.log({"loss": loss.item(), "lr": lr_scheduler.get_last_lr()[0], "step": global_step})
         global_step += 1
 
