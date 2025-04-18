@@ -17,13 +17,19 @@ from src.utils.scheduler import get_lr_scheduler, get_ddpm_scheduler, get_linear
 from evaluate import evaluate
 from src.utils.fid import compute_fid
 from src.utils.make_grid import make_grid
+from src.utils.ema import EMA
 
 config = TrainingConfig()
 optimizer = get_optimizer(model)
 train_loader, test_loader = get_dataloaders(config=config)
-#lr_scheduler = get_lr_scheduler(optimizer,train_loader) # Cosine Scheduler
-lr_scheduler = get_linear_scheduler(optimizer,train_loader) # Linear Scheduler
 noise_scheduler = get_ddpm_scheduler()
+
+if config.lr_scheduler_type == "linear":
+    lr_scheduler = get_linear_scheduler(optimizer,train_loader)
+elif config.lr_scheduler_type =="cosine":
+    lr_scheduler = get_lr_scheduler(optimizer,train_loader)
+else:
+    raise ValueError(f'Unsupported LR Scheduler Type')
 
 # Accelerator
 accelerator = Accelerator(
@@ -34,6 +40,9 @@ accelerator = Accelerator(
 )
 
 wandb.init(project="AML Project Diffusion", config=config.__dict__)
+
+if config.use_ema:
+    ema = EMA(model,decay=0.9999)
 
 # Prepare for training
 model, optimizer, train_loader, lr_scheduler = accelerator.prepare(
@@ -60,13 +69,14 @@ for epoch in range(config.num_epochs):
 
         with accelerator.accumulate(model):
             noise_pred = model(noisy_images, timesteps, return_dict=False)[0]
-            loss = F.mse_loss(noise_pred, noise)
+            loss = F.smooth_l1_loss(noise_pred, noise,beta=1)
             accelerator.backward(loss)
 
             optimizer.step()
             lr_scheduler.step()
             #linear_scheduler.step()
             optimizer.zero_grad()
+            ema.update(model)
 
         progress_bar.update(1)
         torch.cuda.empty_cache()
@@ -74,13 +84,14 @@ for epoch in range(config.num_epochs):
         global_step += 1
 
     if accelerator.is_main_process:
-        pipeline = DDPMPipeline(unet=accelerator.unwrap_model(model), scheduler=noise_scheduler)
+        # pipeline = DDPMPipeline(unet=accelerator.unwrap_model(model), scheduler=noise_scheduler)
+        ema_pipeline = DDPMPipeline(unet=accelerator.unwrap_model(ema.get_model(), scheduler = noise_scheduler))  #Using EMA model for evaluation
         
         # Generate and Evaluate images 
         if (epoch + 1) % config.save_image_epochs == 0:
-            print(f'Evaluating at epoch {epoch}')
-            fid_score = evaluate(config, epoch, pipeline, test_loader, device=accelerator.device)
-            wandb.log({"FID Score": fid_score, "Epoch": epoch}, step=epoch)
+            print(f'Evaluating at epoch {epoch} (EMA model)')
+            fid_score = evaluate(config, epoch, ema_pipeline, test_loader, device=accelerator.device)
+            wandb.log({"FID Score (EMA)": fid_score, "Epoch": epoch}, step=epoch)
 
         if (epoch + 1) % config.save_model_epochs == 0:
             model_save_path = f"{config.output_dir}/model_epoch_{epoch}.pt"
