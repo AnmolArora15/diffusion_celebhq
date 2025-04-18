@@ -13,7 +13,7 @@ class TrainingConfig:
     lr_scheduler_type:str = "linear"
     use_ema = True
     save_image_epochs = 20
-    save_model_epochs = 40
+    save_model_epochs = 100
     mixed_precision = "fp16"
     output_dir: str = "/scratch/aml_coursework/my_diffusion_project/samples"
     push_to_hub: bool = False
