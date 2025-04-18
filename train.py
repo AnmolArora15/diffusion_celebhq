@@ -49,6 +49,8 @@ model, optimizer, train_loader, lr_scheduler = accelerator.prepare(
     model, optimizer, train_loader, lr_scheduler
 )
 
+if config.use_ema:
+    ema.ema_model.to(accelerator.device)
 global_step = 0
 
 for epoch in range(config.num_epochs):
@@ -74,9 +76,9 @@ for epoch in range(config.num_epochs):
 
             optimizer.step()
             lr_scheduler.step()
-            #linear_scheduler.step()
             optimizer.zero_grad()
-            ema.update(model)
+            if config.use_ema:
+                ema.update(model)
 
         progress_bar.update(1)
         torch.cuda.empty_cache()
@@ -85,7 +87,7 @@ for epoch in range(config.num_epochs):
 
     if accelerator.is_main_process:
         # pipeline = DDPMPipeline(unet=accelerator.unwrap_model(model), scheduler=noise_scheduler)
-        ema_pipeline = DDPMPipeline(unet=accelerator.unwrap_model(ema.get_model(), scheduler = noise_scheduler))  #Using EMA model for evaluation
+        ema_pipeline = DDPMPipeline(unet=accelerator.unwrap_model(ema.get_model()), scheduler = noise_scheduler)  #Using EMA model for evaluation
         
         # Generate and Evaluate images 
         if (epoch + 1) % config.save_image_epochs == 0:
@@ -96,4 +98,7 @@ for epoch in range(config.num_epochs):
         if (epoch + 1) % config.save_model_epochs == 0:
             model_save_path = f"{config.output_dir}/model_epoch_{epoch}.pt"
             torch.save(model.state_dict(), model_save_path)
+            ema_model_save_path = f"{config.output_dir}/ema_model_epoch_{epoch}.pt"
+            torch.save(ema.get_model().state_dict(), ema_model_save_path)
+            wandb.save(ema_model_save_path)
             wandb.save(model_save_path)
