@@ -14,7 +14,6 @@ model = UNet2DModel(
         "DownBlock2D",
         "AttnDownBlock2D",
         "DownBlock2D",
-        #"DownBlock2D",
         "AttnDownBlock2D",
         "DownBlock2D",
     ),
@@ -25,6 +24,5 @@ model = UNet2DModel(
         "AttnUpBlock2D",
         "UpBlock2D",
         "UpBlock2D",
-        # "UpBlock2D",
     ),
 )

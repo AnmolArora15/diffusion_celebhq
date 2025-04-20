@@ -71,7 +71,7 @@ for epoch in range(config.num_epochs):
 
         with accelerator.accumulate(model):
             noise_pred = model(noisy_images, timesteps, return_dict=False)[0]
-            loss = F.smooth_l1_loss(noise_pred, noise,beta=1)
+            loss = F.mse_loss(noise_pred, noise)
             accelerator.backward(loss)
 
             optimizer.step()
@@ -91,7 +91,7 @@ for epoch in range(config.num_epochs):
         
         # Generate and Evaluate images 
         if (epoch + 1) % config.save_image_epochs == 0:
-            print(f'Evaluating at epoch {epoch} (EMA model)')
+            print(f' Evaluating at epoch {epoch} (EMA model)')
             fid_score = evaluate(config, epoch, ema_pipeline, test_loader, device=accelerator.device)
             wandb.log({"FID Score (EMA)": fid_score, "Epoch": epoch}, step=epoch)
 
