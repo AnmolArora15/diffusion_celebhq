@@ -52,15 +52,10 @@ def evaluate(config, epoch, pipeline, test_loader, device):
     image_grid.save(save_path)
     print(f"Saved image grid to {save_path}")
 
-    ####### Save FID Score (optional local logging) ########
-    #fid_path = os.path.join(test_dir, f"fid_epoch_{epoch}.txt")
-    #with open(fid_path, "w") as f:
-        #f.write(f"FID: {fid_score}\n")
-
     ####### Log to W&B ########
     wandb.log({
         f"Generated Images/Epoch {epoch}": wandb.Image(image_grid),
-        "FID Score": fid_score
+        # "FID Score": fid_score
     }, step=epoch)
 
     return fid_score

@@ -18,6 +18,7 @@ from evaluate import evaluate
 from src.utils.fid import compute_fid
 from src.utils.make_grid import make_grid
 from src.utils.ema import EMA
+from dataclasses import asdict
 
 config = TrainingConfig()
 optimizer = get_optimizer(model)
@@ -39,7 +40,13 @@ accelerator = Accelerator(
     project_dir=config.output_dir
 )
 
-wandb.init(project="AML Project Diffusion", config=config.__dict__)
+wandb.init(project="AML Project Diffusion", config=asdict(config))
+
+## Adding code to W&B
+code_artifact = wandb.Artifact("Training-code",type="code")
+code_artifact.add_file("config.py")
+code_artifact.add_file("src/model.py")
+wandb.log_artifact(code_artifact)
 
 if config.use_ema:
     ema = EMA(model,decay=0.9999)
