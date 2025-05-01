@@ -5,15 +5,15 @@ from dataclasses import dataclass
 class TrainingConfig:
     image_size = 256
     train_batch_size = 16
-    eval_batch_size = 30
-    num_epochs = 1
+    eval_batch_size = 16
+    num_epochs = 30
     gradient_accumulation_steps = 1
-    learning_rate = 1e-4
+    learning_rate = 0.00009
     lr_warmup_step = 250
     lr_scheduler_type:str = "linear"
-    inference_steps = 50
+    inference_steps = 200
     use_ema = False
-    save_image_epochs = 1
+    save_image_epochs = 30
     save_model_epochs = 500
     mixed_precision = "fp16"
     output_dir: str = "/scratch/aml_coursework/my_diffusion_project/samples/LDM"

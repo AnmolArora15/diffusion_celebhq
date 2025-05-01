@@ -8,9 +8,9 @@ def get_dataloaders(config):
     train_transform = transforms.Compose([
         transforms.Resize((config.image_size,config.image_size)),
         transforms.RandomHorizontalFlip(p=0.5),
-        #transforms.ColorJitter(brightness=0.2,contrast=0.2,saturation=0.1,hue=0.05),
-        # transforms.RandomResizedCrop(128, scale=(0.9, 1.0),    # Minor zoom-ins / re-centering
-                                #  ratio=(0.95, 1.05)),
+        transforms.ColorJitter(brightness=0.2,contrast=0.2,saturation=0.1,hue=0.05),
+        transforms.RandomResizedCrop(128, scale=(0.9, 1.0),    # Minor zoom-ins / re-centering
+                                  ratio=(0.95, 1.05)),
         transforms.ToTensor(),
         transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 

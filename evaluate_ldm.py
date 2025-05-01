@@ -24,7 +24,7 @@ def evaluate_ldm(config, epoch, unet, vae, noise_scheduler, test_loader, device)
     # === Generate 300 images ===
     for i in range(num_batches):
         bs = min(batch_size, total_images - len(latents_list))
-        latents = torch.randn(bs, 4, 8, 8).to(device)
+        latents = torch.randn(bs, 4, 32, 32).to(device)
         noise_scheduler.set_timesteps(config.inference_steps)
 
         for t in noise_scheduler.timesteps:
@@ -35,10 +35,15 @@ def evaluate_ldm(config, epoch, unet, vae, noise_scheduler, test_loader, device)
 
     #  Decoding Generated latents
     all_latents = torch.cat(latents_list, dim=0)[:total_images]
-    decoded = vae.decode(all_latents / 0.18215).sample
-    decoded = ((decoded.clamp(-1, 1) + 1) / 2)
-    real_images = real_images.to(device)
-    decoded = decoded.to(device)
+    decoded_images = []
+    for i in range(0, total_images, batch_size):
+        latent_batch = all_latents[i:i + batch_size].to(device)
+        with torch.amp.autocast('cuda'):  # optional fp16 decoding
+            decoded_batch = vae.decode(latent_batch / 0.18215).sample
+        decoded_batch = ((decoded_batch.clamp(-1, 1) + 1) / 2).cpu()
+        decoded_images.append(decoded_batch)
+        torch.cuda.empty_cache()
+    decoded = torch.cat(decoded_images, dim=0).to(device)
 
     # === Get 300 real images ===
     real_images = []
@@ -47,6 +52,7 @@ def evaluate_ldm(config, epoch, unet, vae, noise_scheduler, test_loader, device)
         if len(real_images) >= total_images:
             break
     real_images = torch.stack(real_images[:total_images])
+    real_images = real_images.to(device)
     
 
     # === Compute FID ===
@@ -54,7 +60,7 @@ def evaluate_ldm(config, epoch, unet, vae, noise_scheduler, test_loader, device)
     print(f"✅ FID Score (epoch {epoch}): {fid_score:.4f}")
 
     # === Save Grid ===
-    grid_images = [transforms.ToPILImage()(img.cpu()) for img in decoded[:16]]
+    grid_images = [transforms.ToPILImage()(img) for img in decoded[:16]]
     grid = make_grid(grid_images, rows=4, cols=4)
 
     save_dir = os.path.join(config.output_dir, "samples")

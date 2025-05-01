@@ -101,10 +101,10 @@ for epoch in range(config.num_epochs):
         if (epoch + 1) % config.save_model_epochs == 0:
             model_path = os.path.join(config.output_dir, f"ldm_unet_epoch_{epoch+1}.pt")
             torch.save(accelerator.unwrap_model(unet).state_dict(), model_path)
-            wandb.save(model_path)
+            #wandb.save(model_path)
 
             with torch.no_grad():
-                latents = torch.randn(16, 4, 8, 8).to(accelerator.device)
+                latents = torch.randn(16, 4, 32, 32).to(accelerator.device)
                 noise_scheduler.set_timesteps(config.inference_steps)
 
                 for t in noise_scheduler.timesteps:
