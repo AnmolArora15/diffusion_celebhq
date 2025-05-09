@@ -23,8 +23,12 @@ def evaluate_ldm(config, epoch, unet, vae, noise_scheduler, test_loader, device)
 
     # === Generate 300 images ===
     for i in range(num_batches):
-        bs = min(batch_size, total_images - len(latents_list))
-        latents = torch.randn(bs, 4, 32, 32).to(device)
+        num_generated = sum([x.shape[0] for x in latents_list])
+        bs = min(batch_size, total_images - num_generated)
+        if bs == 0 :
+            break
+
+        latents = torch.randn(bs, 4, 16, 16).to(device)
         noise_scheduler.set_timesteps(config.inference_steps)
 
         for t in noise_scheduler.timesteps:
@@ -57,7 +61,7 @@ def evaluate_ldm(config, epoch, unet, vae, noise_scheduler, test_loader, device)
 
     # === Compute FID ===
     fid_score = compute_fid(real_images, decoded, device)
-    print(f"✅ FID Score (epoch {epoch}): {fid_score:.4f}")
+    print(f"-----FID Score (epoch {epoch}): {fid_score:.4f}-----------")
 
     # === Save Grid ===
     grid_images = [transforms.ToPILImage()(img) for img in decoded[:16]]
@@ -71,8 +75,7 @@ def evaluate_ldm(config, epoch, unet, vae, noise_scheduler, test_loader, device)
 
     # === Log to W&B ===
     wandb.log({
-        f"Generated Images/Epoch {epoch}": wandb.Image(grid),
-        "FID Score": fid_score
-    }, step=epoch)
+         f"Generated Images/Epoch {epoch}": wandb.Image(grid)
+     },step=epoch)
 
     return fid_score
