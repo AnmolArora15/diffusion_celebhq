@@ -1,6 +1,6 @@
 from diffusers.optimization import get_cosine_schedule_with_warmup
 from transformers import get_linear_schedule_with_warmup
-from diffusers import DDPMScheduler
+from diffusers import DDPMScheduler,DDIMScheduler
 from config import TrainingConfig
 
 ### LR Scheduler (cosine_schedule_with_warpup)
@@ -29,7 +29,8 @@ def get_linear_scheduler(optimizer,train_loader):
 # Noise Scheduler
 
 def get_ddpm_scheduler():
-    return DDPMScheduler(num_train_timesteps=1000)
+    return DDPMScheduler(num_train_timesteps=2000)
+
 
 
      

@@ -4,13 +4,13 @@ from dataclasses import dataclass
 @dataclass
 class TrainingConfig:
     image_size = 256
-    train_batch_size = 16
+    train_batch_size = 32
     eval_batch_size = 30
     num_epochs = 500
     gradient_accumulation_steps = 2
     learning_rate = 0.0001
     lr_warmup_step = 300
-    lr_scheduler_type:str = "linear"
+    lr_scheduler_type:str = "cosine"
     inference_steps = 200
     use_ema = True
     save_image_epochs = 50
