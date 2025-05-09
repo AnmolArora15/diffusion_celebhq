@@ -6,9 +6,8 @@ def get_ldm_unet():
         in_channels=4,
         out_channels=4,
         layers_per_block=2,
-        block_out_channels=(64,128,256,384,512),
+        block_out_channels=(64,128,256,384)
         down_block_types=(
-            "DownBlock2D",
             "DownBlock2D",
             "DownBlock2D",
             "AttnDownBlock2D",
@@ -18,7 +17,6 @@ def get_ldm_unet():
         up_block_types=(
             "UpBlock2D",
             "AttnUpBlock2D",
-            "UpBlock2D",
             "UpBlock2D",
             "UpBlock2D",
         ),

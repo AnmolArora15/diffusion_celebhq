@@ -11,7 +11,7 @@ class TrainingConfig:
     learning_rate = 0.0001
     lr_warmup_step = 300
     lr_scheduler_type:str = "linear"
-    inference_steps = 300
+    inference_steps = 200
     use_ema = True
     save_image_epochs = 50
     save_model_epochs = 500
