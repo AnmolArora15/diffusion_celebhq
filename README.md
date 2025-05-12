@@ -32,38 +32,35 @@ It's recommended to use a virtual environment or Google Colab.
 ## How to Run:
 1. Clone the Repository
    ```bash
-   git clone 
+   git clone https://github.com/AnmolArora15/diffusion_celebhq.git
+   cd diffusion_celebhq
 
-1. Make sure the CelebA dataset is downloaded and paths are correctly set in `config.py`.
+2. Make sure the CelebA dataset is downloaded and paths are correctly set in `config.py`.
 
-2. Install dependencies:
-	```bash
- 	pip install torch torchvision diffusers accelerate wandb tqdm
-
-3. Start training:
+3. Model Training:
    ```bash
 	python train.py
 - Starts training from scratch (Epoch 0) using settings from `config.py`.
 - Saves model checkpoints and 4×4 image grids every few epochs.
 - Logs training loss and FID to Weights & Biases (W&B).
 
-4. Evaluation is automatically triggered in `train.py` by calling `evaluate.py` every `save_image_epochs`:
+4. Evaluation is automatically handled in `train.py` by calling `evaluate.py` every `save_image_epochs`:
    - Uses EMA model to generate 300 fake images.
    - Computes FID against 300 real test images.
    - Saves images and model checkpoints.
 
-5. You can adjust training settings in `config.py` as needed.
+5. Check different Hyperparameter in `config.py` as change it accordingly.
 
-6. To test different schedulers, run
-	```bash
-	 sampling_with_Scheduler.py
+6. Sampling with different Schedulers
+   ```bash
+   	sampling_with_Scheduler.py
  
-   - Set `ema_chpt_path` to your saved EMA model checkpoint.
-   - The script loads the model and uses schedulers like DDIM, PNDM, and DPM-Solver to generate 300 images.
-   - Images are saved and evaluated using FID.
-   - Helps visually and quantitatively compare different samplers.
+- Set `ema_chpt_path` to your saved EMA model checkpoint.
+- The script loads the model and uses schedulers like DDIM, PNDM, and DPM-Solver to generate 300 images.
+- Images are saved and evaluated using FID.
+- Helps visually and quantitatively compare different samplers.
 
 ---
 
 ## NOTE:
-Always check training configuration `config.py` before starting training to ensure the parameters are set as intended.
+Always check training configuration in `config.py` before starting training to ensure the parameters are set as intended.
